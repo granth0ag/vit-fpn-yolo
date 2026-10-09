@@ -15,7 +15,7 @@ class ViTBackBone(nn.Module):
         self.embed_dim = self.vit.embed_dim
         self.patch_size = 16
 
-        def forward_features(self,x):
+        def forward(self,x):
 
             tokens = self.vit.forward_features(x)
             # Remove CLS token
