@@ -38,7 +38,15 @@ feat = model.backbone(images)
 print("3) backbone:", feat.shape)                       # [8, 384, 20, 20]
 print("   neck    :", [p.shape for p in model.neck(feat)])
 preds = model(images)
-print("   head    :", [p.shape for p in preds])         # [8,144,40,40], [8,144,20,20], [8,144,10,10]
+if isinstance(preds, dict):                             # naye ultralytics
+    print("   head keys:", list(preds.keys()))
+    for k, v in preds.items():
+        if torch.is_tensor(v):
+            print(f"     {k}: {tuple(v.shape)}")
+        else:                                           # list of tensors (jaise feats)
+            print(f"     {k}:", [tuple(p.shape) for p in v])
+else:                                                   # purane versions: list of 3 maps
+    print("   head    :", [p.shape for p in preds])
 
 # ---- loss + gradients ----
 loss, items = criterion(preds, targets, device)
