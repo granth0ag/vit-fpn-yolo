@@ -1,7 +1,10 @@
 # evaluate.py
 import torch
 from torchmetrics.detection import MeanAveragePrecision
-from ultralytics.utils import ops
+try:
+    from ultralytics.utils.nms import non_max_suppression
+except ImportError:                                  
+    from ultralytics.utils.ops import non_max_suppression
 
 from src.dataset import build_dataloaders
 from src.model.vit import ViTDetBackbone
@@ -44,7 +47,7 @@ def evaluate():
 
     for images, targets, _ in val_loader:
         y, _ = model(images.to(device))                     # [B, 84, 2100], boxes xywh pixels
-        dets = ops.non_max_suppression(y, conf_thres=CONF_THRES, iou_thres=IOU_THRES)
+        dets = non_max_suppression(y, conf_thres=CONF_THRES, iou_thres=IOU_THRES)
 
         preds, gts = [], []
         for d, t in zip(dets, targets):

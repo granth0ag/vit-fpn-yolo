@@ -5,7 +5,10 @@ from pathlib import Path
 import torch
 import torchvision.transforms as T
 from PIL import Image, ImageDraw
-from ultralytics.utils import ops
+try:
+    from ultralytics.utils.nms import non_max_suppression
+except ImportError:                                  # purane ultralytics
+    from ultralytics.utils.ops import non_max_suppression
 
 from src.model.vit import ViTDetBackbone
 from src.model.fpn import SimpleFeaturePyramid
@@ -66,7 +69,7 @@ def detect(model, image):
     x = to_tensor(canvas).unsqueeze(0).to(device)
 
     y, _ = model(x)                                              # [1, 84, 2100]
-    det = ops.non_max_suppression(y, conf_thres=CONF_THRES, iou_thres=IOU_THRES)[0].cpu()
+    det = non_max_suppression(y, conf_thres=CONF_THRES, iou_thres=IOU_THRES)[0].cpu()
 
     # letterbox pixels -> original pixels
     det[:, [0, 2]] = ((det[:, [0, 2]] - pad_x) / scale).clamp(0, w0)
