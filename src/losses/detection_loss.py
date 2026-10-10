@@ -15,6 +15,7 @@ def make_batch(targets, device):
     }
 
 
+
 class DetectionLoss:
     """Thin wrapper: model + targets list -> loss."""
     def __init__(self, model):
@@ -22,4 +23,12 @@ class DetectionLoss:
 
     def __call__(self, preds, targets, device):
         loss, loss_items = self.criterion(preds, make_batch(targets, device))
-        return loss.sum(), loss_items.detach()    # scalar for backward, [box, cls, dfl] for logging
+
+        if isinstance(loss_items, dict):          # naye ultralytics versions
+            vals = list(loss_items.values())
+            loss_items = torch.stack([torch.as_tensor(v, dtype=torch.float32).detach().reshape(()).cpu()
+                                      for v in vals])
+        else:                                     # purane versions: tensor [box, cls, dfl]
+            loss_items = loss_items.detach().cpu()
+
+        return loss.sum(), loss_items
