@@ -1,0 +1,8 @@
+timm
+einops
+ultralytics
+torchmetrics
+pycocotools
+pyyaml
+
+# run !pip install -r requirements.txt
